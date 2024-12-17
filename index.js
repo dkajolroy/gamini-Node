@@ -4,22 +4,16 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require("fs");
 app.use(express.json());
 
-const imageOne = Buffer.from(fs.readFileSync("bell.jpg")).toString("base64");
-const imageTwo = Buffer.from(fs.readFileSync("girl.jpg")).toString("base64");
-const imageThree = Buffer.from(fs.readFileSync("silu.jpg")).toString("base64");
-const imageFour = Buffer.from(fs.readFileSync("tor.jpg")).toString("base64");
-const imageFive = Buffer.from(fs.readFileSync("tia.jpg")).toString("base64");
-const imageSix = Buffer.from(fs.readFileSync("bird.jpeg")).toString("base64");
-
+const imageSix = Buffer.from(fs.readFileSync("images/bird.jpeg")).toString(
+  "base64"
+);
 // Gobal variable
 const PORT = 3000;
-const API_KEY = "";
+const API_KEY = " ";
 const image = {
   inlineData: {
-    // data: Buffer.from(fs.readFileSync("demo.png")).toString("base64"),
-    data: imageOne,
-    // data: "https://t4.ftcdn.net/jpg/08/31/71/97/240_F_831719791_Ak2W8LSyiktuRC92TDXVKtEHgfdaNNem.jpg",
-    mimeType: "image/*",
+    data: imageSix,
+    mimeType: "image/jpeg",
   },
 };
 
@@ -57,28 +51,39 @@ app.get("/", async (req, res) => {
     });
   }
 });
-
+const images = [
+  "images/bee1.jpg",
+  "images/bee1.jpg",
+  "images/bee1.jpg",
+  "images/bee1.jpg",
+  "images/bee1.jpg",
+];
 app.get("/multi", async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent([
-      {
-        inlineData: {
-          data: imageSix,
-          mimeType: "image/jpeg",
-        },
-      },
+      ...images.map((x) => {
+        return {
+          inlineData: {
+            data: Buffer.from(fs.readFileSync(x)).toString("base64"),
+            mimeType: "image/*",
+          },
+        };
+      }),
       `
-      Generate a array of object json data. Object key is title, description and tag.
-      Detect images to automatically fill up titles, descriptions and tags SEO friendly.
+      Generate a JSON array without variables. Object key is title, description and tags. 
+      Detect image one by one and fill up titles, descriptions and tags SEO friendly.
+      Sent you a total of ${images.length} images, all image data must be provided.
       Title must be more than 8 words but Don't use [free] word and don't use colon mark. 
-      Not give old title again.
+      Do not generate old title again but with slight changes. 
+      Total 25 SEO tags must be single words and lowercase letters.
+
       Detect image type (transparent, vector, illustration, raster, art ) And Image object (position, situation, capture mode, quality ) etc.
       If you detect image object is black and if it is illustration file so please use silhouette word in the title description.
       If you detect image object is no black, so don't use silhouette word in the title and description.
 
-      Give me only json data without any other information or suggestions.
+      Give me only json data without any other information or suggestions. 
       `,
     ]);
 
